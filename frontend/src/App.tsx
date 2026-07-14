@@ -12,15 +12,28 @@ function App() {
       const response = await axios.post(
         "http://127.0.0.1:8001/login",
         {
-          username,
-          password,
+          username: username,
+          password: password,
         }
       );
 
+      console.log("Success:", response.data);
       setMessage(response.data.message);
 
-    } catch (error) {
-      setMessage("Backend connection error");
+    } catch (error: any) {
+      console.error("Axios Error:", error);
+
+      if (error.response) {
+        console.log("Status:", error.response.status);
+        console.log("Data:", error.response.data);
+        setMessage(error.response.data.message || "Server Error");
+      } else if (error.request) {
+        console.log("No response received:", error.request);
+        setMessage("No response from backend");
+      } else {
+        console.log("Error:", error.message);
+        setMessage(error.message);
+      }
     }
   };
 
@@ -36,6 +49,7 @@ function App() {
       />
 
       <br />
+      <br />
 
       <input
         type="password"
@@ -45,10 +59,14 @@ function App() {
       />
 
       <br />
+      <br />
 
       <button onClick={login}>
         Login
       </button>
+
+      <br />
+      <br />
 
       <h3>{message}</h3>
     </div>
