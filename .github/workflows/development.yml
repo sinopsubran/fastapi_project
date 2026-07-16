@@ -11,9 +11,6 @@ jobs:
     name: Build & Deploy
     runs-on: ubuntu-latest
     
-    # ⚠️ ശ്രദ്ധിക്കുക: "environment: development" എന്ന ലൈൻ ഒഴിവാക്കിയിട്ടുണ്ട്.
-    # ഇത് കാരണം GitHub-ന് നിങ്ങളുടെ 'Repository Secret' നേരിട്ട് റീഡ് ചെയ്യാൻ സാധിക്കും.
-
     defaults:
       run:
         working-directory: ./frontend
@@ -45,5 +42,5 @@ jobs:
           repoToken: ${{ secrets.GITHUB_TOKEN }}
           firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_DISCLOZEDEVELOPMENT }}
           channelId: live
-          projectId: disclozedesgin # 👈 ഇവിടെ പ്രൊജക്റ്റ് ഐഡി 'disclozedesgin' എന്ന് കൃത്യമാക്കിയിട്ടുണ്ട്
+          projectId: disclozedesgin # 👈 പ്രൊജക്റ്റ് ഐഡി കൃത്യമാക്കിയിട്ടുണ്ട്
           entryPoint: ./frontend
