@@ -3,15 +3,15 @@ name: Deploy to Cloud Run
 on:
   push:
     branches:
-      - main
+      - development
   workflow_dispatch:
 
 env:
   PROJECT_ID: disclozedesgin
   REGION: asia-south1
-  REPOSITORY: my-repo          # Change this
-  SERVICE: my-cloudrun-service # Change this
-  IMAGE: my-app                # Change this
+  REPOSITORY: my-repo          # Change to your Artifact Registry repository
+  SERVICE: my-cloudrun-service # Change to your Cloud Run service name
+  IMAGE: my-app                # Change to your image name
 
 jobs:
   deploy:
