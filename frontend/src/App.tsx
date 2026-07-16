@@ -6,11 +6,12 @@ function App() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
+  const apiBaseUrl = import.meta.env.VITE_API_URL || "http://127.0.0.1:8001";
 
   const login = async () => {
     try {
       const response = await axios.post(
-        "http://127.0.0.1:8001/login",
+        `${apiBaseUrl}/login`,
         {
           username: username,
           password: password,
