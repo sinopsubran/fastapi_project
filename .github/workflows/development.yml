@@ -9,9 +9,9 @@ on:
 env:
   PROJECT_ID: disclozedesgin
   REGION: asia-south1
-  REPOSITORY: my-repo          # Replace with your Artifact Registry repository
-  SERVICE: my-cloudrun-service # Replace with your Cloud Run service name
-  IMAGE: my-app
+  REPOSITORY: YOUR_ARTIFACT_REPOSITORY
+  IMAGE: backend
+  SERVICE: YOUR_CLOUD_RUN_SERVICE
 
 jobs:
   deploy:
@@ -34,29 +34,24 @@ jobs:
 
       - name: Configure Docker
         run: |
-          gcloud auth configure-docker asia-south1-docker.pkg.dev
-
-      - name: Show repository structure
-        run: |
-          pwd
-          find . -name Dockerfile
-          ls -R
+          gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev --quiet
 
       - name: Build Docker Image
         run: |
           docker build \
-            -f frontend/Dockerfile \
-            -t asia-south1-docker.pkg.dev/disclozedesgin/my-repo/my-app:${{ github.sha }} \
-            frontend
+            -f backend/Dockerfile \
+            -t ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE }}:${{ github.sha }} \
+            backend
 
       - name: Push Docker Image
         run: |
-          docker push asia-south1-docker.pkg.dev/disclozedesgin/my-repo/my-app:${{ github.sha }}
+          docker push \
+            ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE }}:${{ github.sha }}
 
       - name: Deploy to Cloud Run
         run: |
-          gcloud run deploy my-cloudrun-service \
-            --image asia-south1-docker.pkg.dev/disclozedesgin/my-repo/my-app:${{ github.sha }} \
-            --region asia-south1 \
-            --platform managed \
+          gcloud run deploy ${{ env.SERVICE }} \
+            --image=${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE }}:${{ github.sha }} \
+            --region=${{ env.REGION }} \
+            --platform=managed \
             --allow-unauthenticated
