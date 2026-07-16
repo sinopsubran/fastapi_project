@@ -9,9 +9,9 @@ on:
 env:
   PROJECT_ID: disclozedesgin
   REGION: asia-south1
-  REPOSITORY: my-repo          # Change to your Artifact Registry repository
-  SERVICE: my-cloudrun-service # Change to your Cloud Run service name
-  IMAGE: my-app                # Change to your image name
+  REPOSITORY: my-repo          # Replace with your Artifact Registry repository
+  SERVICE: my-cloudrun-service # Replace with your Cloud Run service name
+  IMAGE: my-app
 
 jobs:
   deploy:
@@ -34,20 +34,29 @@ jobs:
 
       - name: Configure Docker
         run: |
-          gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev
+          gcloud auth configure-docker asia-south1-docker.pkg.dev
+
+      - name: Show repository structure
+        run: |
+          pwd
+          find . -name Dockerfile
+          ls -R
 
       - name: Build Docker Image
         run: |
-          docker build -t ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE }}:${{ github.sha }} .
+          docker build \
+            -f frontend/Dockerfile \
+            -t asia-south1-docker.pkg.dev/disclozedesgin/my-repo/my-app:${{ github.sha }} \
+            frontend
 
       - name: Push Docker Image
         run: |
-          docker push ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE }}:${{ github.sha }}
+          docker push asia-south1-docker.pkg.dev/disclozedesgin/my-repo/my-app:${{ github.sha }}
 
       - name: Deploy to Cloud Run
         run: |
-          gcloud run deploy ${{ env.SERVICE }} \
-            --image=${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE }}:${{ github.sha }} \
-            --region=${{ env.REGION }} \
-            --platform=managed \
+          gcloud run deploy my-cloudrun-service \
+            --image asia-south1-docker.pkg.dev/disclozedesgin/my-repo/my-app:${{ github.sha }} \
+            --region asia-south1 \
+            --platform managed \
             --allow-unauthenticated
