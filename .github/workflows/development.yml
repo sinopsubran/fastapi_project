@@ -4,27 +4,36 @@ on:
   push:
     branches:
       - development
+  workflow_dispatch:
 
 jobs:
   build_and_deploy:
     name: Build & Deploy
     runs-on: ubuntu-latest
     environment: development
+    
+    # 1. എല്ലാ കമാൻഡുകളും 'frontend' ഫോൾഡറിനുള്ളിൽ റൺ ചെയ്യാൻ ഇത് സഹായിക്കുന്നു
+    defaults:
+      run:
+        working-directory: ./frontend
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      # 2. Node.js സെറ്റ് ചെയ്യുന്നു (ലോക്ക് ഫയൽ പ്രശ്നം ഒഴിവാക്കാൻ cache ഒഴിവാക്കി)
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '22'
-          cache: 'npm'
 
       - name: Install dependencies
         run: npm ci
 
+      # 3. .env.example ഫയൽ ഇല്ലാതെ നേരിട്ട് .env ഫയൽ ഉണ്ടാക്കുന്നു
       - name: Create .env from environment variables
-        run: envsubst < .env.example > .env
+        run: |
+          echo "VITE_API_URL=${VITE_API_URL}" > .env
         env:
           VITE_API_URL: ${{ vars.VITE_API_URL }}
 
@@ -37,4 +46,5 @@ jobs:
           repoToken: ${{ secrets.GITHUB_TOKEN }}
           firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_DISCLOZEDEVELOPMENT }}
           channelId: live
-          projectId: disclozedesgin
+          projectId: disclozedevelopment
+          entryPoint: ./frontend
