@@ -13,8 +13,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Project Files Copy 
 COPY . .
 
-# Port 
+# Port
 EXPOSE 8001
 
-# FastAPI Start 
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8001"]
+# FastAPI Start
+CMD ["sh", "-c", "uvicorn main:app --host 0.0.0.0 --port ${PORT:-8001}"]
