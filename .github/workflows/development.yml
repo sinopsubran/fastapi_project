@@ -10,9 +10,10 @@ jobs:
   build_and_deploy:
     name: Build & Deploy
     runs-on: ubuntu-latest
-    environment: development
     
-    # 1. എല്ലാ കമാൻഡുകളും 'frontend' ഫോൾഡറിനുള്ളിൽ റൺ ചെയ്യാൻ ഇത് സഹായിക്കുന്നു
+    # ⚠️ ശ്രദ്ധിക്കുക: "environment: development" എന്ന ലൈൻ ഒഴിവാക്കിയിട്ടുണ്ട്.
+    # ഇത് കാരണം GitHub-ന് നിങ്ങളുടെ 'Repository Secret' നേരിട്ട് റീഡ് ചെയ്യാൻ സാധിക്കും.
+
     defaults:
       run:
         working-directory: ./frontend
@@ -21,7 +22,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # 2. Node.js സെറ്റ് ചെയ്യുന്നു (ലോക്ക് ഫയൽ പ്രശ്നം ഒഴിവാക്കാൻ cache ഒഴിവാക്കി)
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -30,7 +30,6 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      # 3. .env.example ഫയൽ ഇല്ലാതെ നേരിട്ട് .env ഫയൽ ഉണ്ടാക്കുന്നു
       - name: Create .env from environment variables
         run: |
           echo "VITE_API_URL=${VITE_API_URL}" > .env
@@ -46,5 +45,5 @@ jobs:
           repoToken: ${{ secrets.GITHUB_TOKEN }}
           firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_DISCLOZEDEVELOPMENT }}
           channelId: live
-          projectId: disclozedevelopment 
+          projectId: disclozedesgin # 👈 ഇവിടെ പ്രൊജക്റ്റ് ഐഡി 'disclozedesgin' എന്ന് കൃത്യമാക്കിയിട്ടുണ്ട്
           entryPoint: ./frontend
