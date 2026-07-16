@@ -1,46 +1,53 @@
-name: Deploy to Firebase Hosting
+name: Deploy to Cloud Run
 
 on:
   push:
     branches:
-      - development
+      - main
   workflow_dispatch:
 
+env:
+  PROJECT_ID: disclozedesgin
+  REGION: asia-south1
+  REPOSITORY: my-repo          # Change this
+  SERVICE: my-cloudrun-service # Change this
+  IMAGE: my-app                # Change this
+
 jobs:
-  build_and_deploy:
-    name: Build & Deploy
+  deploy:
     runs-on: ubuntu-latest
-    
-    defaults:
-      run:
-        working-directory: ./frontend
+
+    permissions:
+      contents: read
 
     steps:
-      - name: Checkout repository
+      - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
         with:
-          node-version: '22'
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
 
-      - name: Install dependencies
-        run: npm ci
+      - name: Set up Google Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
 
-      - name: Create .env from environment variables
+      - name: Configure Docker
         run: |
-          echo "VITE_API_URL=${VITE_API_URL}" > .env
-        env:
-          VITE_API_URL: ${{ vars.VITE_API_URL }}
+          gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev
 
-      - name: Build
-        run: npm run build
+      - name: Build Docker Image
+        run: |
+          docker build -t ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE }}:${{ github.sha }} .
 
-      - name: Deploy to Firebase Hosting
-        uses: FirebaseExtended/action-hosting-deploy@v0
-        with:
-          repoToken: ${{ secrets.GITHUB_TOKEN }}
-          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
-          channelId: live
-          projectId: disclozedesgin 
-          entryPoint: ./frontend
+      - name: Push Docker Image
+        run: |
+          docker push ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE }}:${{ github.sha }}
+
+      - name: Deploy to Cloud Run
+        run: |
+          gcloud run deploy ${{ env.SERVICE }} \
+            --image=${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE }}:${{ github.sha }} \
+            --region=${{ env.REGION }} \
+            --platform=managed \
+            --allow-unauthenticated
